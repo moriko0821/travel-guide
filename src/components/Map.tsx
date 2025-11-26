@@ -14,9 +14,10 @@ const center = {
 
 type MapProps = {
   locations: Location[];
+  onSelectLocation: (location: Location) => void;
 };
 
-export default function Map({ locations }: MapProps) {
+export default function Map({ locations, onSelectLocation }: MapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -52,6 +53,7 @@ export default function Map({ locations }: MapProps) {
               key={loc.id}
               position={{ lat: loc.lat, lng: loc.lng }}
               title={loc.name}
+              onClick={() => onSelectLocation(loc)}
             />
           );
         })}
