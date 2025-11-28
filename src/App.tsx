@@ -1,30 +1,37 @@
-import { Search, Star } from "lucide-react";
-import Map from "./components/Map";
+import { Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { locations } from "./data/locations";
 import type { Location } from "./data/locations";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
+import MapSection from "./components/MapSection.tsx";
 
 const FAVORITES_STORAGE_KEY = "travel-guide-favorite-ids";
+const LOCATIONS_STORAGE_KEY = "travel-guide-all-locations";
 
 function App() {
   const urlLocation = useLocation();
 
   const [input, setInput] = useState("");
-  const [allLocations, setAllLocations] = useState<Location[]>(locations);
+  const [allLocations, setAllLocations] = useState<Location[]>(() => {
+    const saved = localStorage.getItem(LOCATIONS_STORAGE_KEY);
+    if (!saved) {
+      return locations;
+    }
+
+    try {
+      const parsed = JSON.parse(saved) as Location[];
+      return parsed;
+    } catch {
+      return locations;
+    }
+  });
   const [filteredLocations, setFilteredLocations] =
     useState<Location[]>(allLocations);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
-
-  const [newName, setNewName] = useState("");
-  const [newLat, setNewLat] = useState("");
-  const [newLng, setNewLng] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [newDescription, setNewDescription] = useState("");
 
   const [favoriteIds, setFavoriteIds] = useState<number[]>(() => {
     const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
@@ -51,36 +58,28 @@ function App() {
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
   }, [favoriteIds]);
 
-  function handleAddLocation(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!newName.trim() || !newLat.trim() || !newLng.trim()) {
-      return;
-    }
+  useEffect(() => {
+    localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(allLocations));
+  }, [allLocations]);
 
-    const latNum = Number(newLat);
-    const lngNum = Number(newLng);
-
-    if (Number.isNaN(latNum) || Number.isNaN(lngNum)) {
-      console.error("緯度、経度は数値で入力してください。");
-    }
-
+  function handleAddLocationFromMap(data: {
+    name: string;
+    lat: number;
+    lng: number;
+    category: string;
+    description: string;
+  }) {
     const newLocation: Location = {
       id: Date.now(),
-      name: newName,
-      lat: latNum,
-      lng: lngNum,
-      category: newCategory || "other",
-      description: newDescription || "",
+      name: data.name,
+      lat: data.lat,
+      lng: data.lng,
+      category: data.category,
+      description: data.description,
     };
 
     setAllLocations((prev) => [...prev, newLocation]);
     setFilteredLocations((prev) => [...prev, newLocation]);
-
-    setNewName("");
-    setNewLat("");
-    setNewLng("");
-    setNewCategory("");
-    setNewDescription("");
   }
 
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
@@ -175,63 +174,11 @@ function App() {
             </div>
 
             <div className="w-full max-w-5xl mt-6 px-2 flex flex-col md:flex-row gap-4">
-              <section className="w-full md:w-2/3 space-y-4">
-                <Map
-                  locations={filteredLocations}
-                  onSelectLocation={(loc) => setSelectedLocation(loc)}
-                />
-
-                <form
-                  onSubmit={handleAddLocation}
-                  className="mt-4 w-full max-w-3xl bg-white border border-yellow-200 rounded-md px-4 py-3 space-y-2"
-                >
-                  <h2>新しいスポットを追加</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="名前"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className="border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="カテゴリ"
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      className="border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="緯度"
-                      value={newLat}
-                      onChange={(e) => setNewLat(e.target.value)}
-                      className="border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="経度"
-                      value={newLng}
-                      onChange={(e) => setNewLng(e.target.value)}
-                      className="border rounded px-2 py-1 text-sm"
-                    />
-                  </div>
-                  <textarea
-                    placeholder="詳細（任意）"
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    className="border rounded px-2 py-1 text-sm"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
-                    >
-                      スポットを追加
-                    </button>
-                  </div>
-                </form>
-              </section>
+              <MapSection
+                locations={filteredLocations}
+                onSelectLocation={setSelectedLocation}
+                onAddLocation={handleAddLocationFromMap}
+              />
               <Sidebar
                 selectedLocation={selectedLocation}
                 isSelectedFavorite={isSelectedFavorite}
