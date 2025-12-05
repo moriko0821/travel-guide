@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import type { Location } from "../data/locations";
 
 const containerStyle = {
@@ -14,10 +14,15 @@ const center = {
 
 type MapProps = {
   locations: Location[];
+  selectedLocation: Location | null;
   onSelectLocation: (location: Location) => void;
 };
 
-export default function Map({ locations, onSelectLocation }: MapProps) {
+export default function Map({
+  locations,
+  selectedLocation,
+  onSelectLocation,
+}: MapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -34,12 +39,44 @@ export default function Map({ locations, onSelectLocation }: MapProps) {
     setMap(null);
   }, []);
 
+  useEffect(() => {
+    if (!map || !selectedLocation) return;
+
+    map.panTo({
+      lat: selectedLocation.lat,
+      lng: selectedLocation.lng,
+    });
+
+    map.setZoom(12);
+  }, [map, selectedLocation]);
+
+  useEffect(() => {
+    if (!map || locations.length === 0) return;
+
+    if (selectedLocation) return;
+
+    if (locations.length === 1) {
+      const only = locations[0];
+      map.panTo({ lat: only.lat, lng: only.lng });
+      map.setZoom(12);
+      return;
+    }
+
+    const bounds = new google.maps.LatLngBounds();
+
+    locations.forEach((loc) => {
+      bounds.extend({ lat: loc.lat, lng: loc.lng });
+    });
+
+    map.fitBounds(bounds);
+  }, [map, locations, selectedLocation]);
+
   if (!isLoaded) {
     return <p className="text-center">Loading Map...</p>;
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-6">
+    <div className="w-full max-w-3xl mx-auto mb-6">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}

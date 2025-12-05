@@ -3,8 +3,9 @@ import type { Location } from "../data/locations";
 type FavoriteProps = {
   favoriteLocations: Location[];
   selectedLocation: Location | null;
-  setSelectedLocation: (loca: Location) => void;
+  setSelectedLocation: (loc: Location) => void;
   favoriteIds: number[];
+  onDeleteLocation: (id: number) => void;
 };
 
 const Favorites = ({
@@ -12,10 +13,11 @@ const Favorites = ({
   selectedLocation,
   setSelectedLocation,
   favoriteIds,
+  onDeleteLocation,
 }: FavoriteProps) => {
   return (
     <main className="min-h-screen bg-yellow-50 flex flex-col items-center py-8 px-2">
-      <div className="w-full max-w-3xl mt-6 px-2">
+      <div className="w-full max-w-5xl mt-6 px-2">
         <h2 className="text-lg font-semibold text-slate-800 mb-3">
           お気に入り一覧
         </h2>
@@ -31,8 +33,34 @@ const Favorites = ({
                 className="bg-white border-2 border-yellow-900 rounded-md px-3 py-2 text-sm text-slate-800 cursor-pointer hover:bg-yellow-100"
                 onClick={() => setSelectedLocation(loc)}
               >
-                <div className="font-semibold">{loc.name}</div>
-                <div className="text-xs text-slate-500">{loc.category}</div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedLocation(loc)}
+                  className="w-full text-left"
+                >
+                  <div className="font-semibold">{loc.name}</div>
+                  <div className="text-xs text-slate-500">{loc.category}</div>
+                  {loc.imageUrl && (
+                    <img
+                      src={loc.imageUrl}
+                      alt={loc.name}
+                      className="mt-2 w-full h-32 object-cover rounded"
+                    />
+                  )}
+                </button>
+                <div className="mt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`${loc.name}を削除しますか？`)) {
+                        onDeleteLocation(loc.id);
+                      }
+                    }}
+                    className="text-xs px-3 py-1 rounded-full border-2 border-slate-500 text-slate-600 hover:bg-red-100"
+                  >
+                    削除する
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

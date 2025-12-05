@@ -5,6 +5,7 @@ export type Location = {
   lng: number;
   description: string;
   category: string;
+  imageUrl?: string;
 };
 
 export const locations: Location[] = [

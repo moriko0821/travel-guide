@@ -7,6 +7,8 @@ type SidebarProps = {
   onToggleFavorite: () => void;
   favoriteLocations: Location[];
   onSetSelectedLocation: (loc: Location) => void;
+  onDeleteLocation: (id: number) => void;
+  onClearSelectedLocation: () => void;
 };
 
 const Sidebar = ({
@@ -15,12 +17,21 @@ const Sidebar = ({
   onToggleFavorite,
   favoriteLocations,
   onSetSelectedLocation,
+  onDeleteLocation,
+  onClearSelectedLocation,
 }: SidebarProps) => {
   return (
     <aside className="md:w-1/3 w-full">
       {selectedLocation ? (
         <div className="bg-white border-2 border-yellow-900 rounded-md px-4 py-3 shadow-sm">
           <h2 className="font-semibold text-lg">{selectedLocation.name}</h2>
+          {selectedLocation.imageUrl && (
+            <img
+              src={selectedLocation.imageUrl}
+              alt={selectedLocation.name}
+              className="my-2.5 w-full rounded-md max-h-96 object-cover"
+            />
+          )}
           <p className="text-sm text-slate-600 mt-1">
             {selectedLocation.description}
           </p>
@@ -42,9 +53,31 @@ const Sidebar = ({
               />
             </button>
           </div>
+          <div className="mt-3 flex justify-between">
+            <button
+              type="button"
+              onClick={onClearSelectedLocation}
+              className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
+            >
+              地図全体を表示
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (
+                  window.confirm(`${selectedLocation.name}を削除しますか？`)
+                ) {
+                  onDeleteLocation(selectedLocation.id);
+                }
+              }}
+              className="text-xs px-3 py-1 rounded-full border-2 border-slate-500 text-slate-600 hover:bg-red-100"
+            >
+              スポットを削除
+            </button>
+          </div>
         </div>
       ) : (
-        <p>マーカーをクリックすると、ここに場所の情報が表示されます。</p>
+        <p>マーカーを選択すると、場所の情報が表示されます。</p>
       )}
       <div className="mt-4">
         <h3 className="text-sm font-semibold text-slate-800 mb-2">
@@ -53,16 +86,24 @@ const Sidebar = ({
         {favoriteLocations.length === 0 ? (
           <p className="text-xs text-slate-500">まだお気に入りはありません</p>
         ) : (
-          <ul className="space-y-1">
-            {favoriteLocations.map((loc) => (
-              <li
-                key={loc.id}
-                className="text-sm text-slate-700 cursor-pointer hover:bg-yellow-50 rounded px-2 py-1"
-                onClick={() => onSetSelectedLocation(loc)}
-              >
-                {loc.name}
-              </li>
-            ))}
+          <ul className="space-y-2 max-h-64 overflow-y-auto">
+            {favoriteLocations.map((loc) => {
+              const isActive =
+                selectedLocation && selectedLocation.id === loc.id;
+              return (
+                <li
+                  key={loc.id}
+                  className={`flex items-center justify-between text-sm rounded-md px-3 py-2 cursor-pointer border ${
+                    isActive
+                      ? "bg-yellow-100 border-yellow-900"
+                      : "bg-white border-yellow-600 hover:bg-yellow-50"
+                  }`}
+                  onClick={() => onSetSelectedLocation(loc)}
+                >
+                  {loc.name}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
