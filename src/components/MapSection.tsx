@@ -14,6 +14,7 @@ type MapSectionProps = {
     category: string;
     description: string;
     imageUrl?: string;
+    placeId?: string;
   }) => void;
 };
 
@@ -22,7 +23,7 @@ type Suggestion = {
   placeId: string;
 };
 
-const CATEGORY_OPTIONS = [
+export const CATEGORY_OPTIONS = [
   { value: "city" },
   { value: "nature" },
   { value: "restaurant" },
@@ -42,6 +43,7 @@ const MapSection = ({
   const [newCategory, setNewCategory] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [newPlaceId, setNewPlaceId] = useState<string | undefined>(undefined);
 
   const [suggestions, setSuggegstions] = useState<Suggestion[]>([]);
 
@@ -83,6 +85,7 @@ const MapSection = ({
 
   function handleSelectSuggestion(sug: Suggestion) {
     setNewName(sug.description);
+    setNewPlaceId(sug.placeId);
     setSuggegstions([]);
 
     if (
@@ -146,6 +149,7 @@ const MapSection = ({
       category: newCategory || "other",
       description: newDescription || "",
       imageUrl: newImageUrl || "",
+      placeId: newPlaceId,
     });
 
     setNewName("");

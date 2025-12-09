@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { locations } from "./data/locations";
 import type { Location } from "./data/locations";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
 import MapSection from "./components/MapSection.tsx";
@@ -78,6 +78,7 @@ function App() {
     category: string;
     description: string;
     imageUrl?: string;
+    placeId?: string;
   }) {
     const newLocation: Location = {
       id: Date.now(),
@@ -87,6 +88,7 @@ function App() {
       category: data.category,
       description: data.description,
       imageUrl: data.imageUrl,
+      placeId: data.placeId,
     };
 
     setAllLocations((prev) => [...prev, newLocation]);
@@ -133,6 +135,20 @@ function App() {
     );
   }
 
+  function handleUpdateLocation(updated: Location) {
+    setAllLocations((prev) =>
+      prev.map((loc) => (loc.id === updated.id ? updated : loc))
+    );
+
+    setFilteredLocations((prev) =>
+      prev.map((loc) => (loc.id === updated.id ? updated : loc))
+    );
+
+    setSelectedLocation((current) =>
+      current && current.id === updated.id ? updated : current
+    );
+  }
+
   // Search result with category Filter and sorted
   const visibleLocation: Location[] = (() => {
     let list = filteredLocations;
@@ -173,6 +189,7 @@ function App() {
                 onSetSelectedLocation={setSelectedLocation}
                 onDeleteLocation={handleDeleteLocation}
                 onClearSelectedLocation={() => setSelectedLocation(null)}
+                onUpdateLocation={handleUpdateLocation}
               />
             </div>
           </main>

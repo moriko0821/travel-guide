@@ -42,6 +42,8 @@ export default function Map({
   useEffect(() => {
     if (!map || !selectedLocation) return;
 
+    console.log(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+
     map.panTo({
       lat: selectedLocation.lat,
       lng: selectedLocation.lng,

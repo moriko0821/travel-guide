@@ -6,6 +6,7 @@ export type Location = {
   description: string;
   category: string;
   imageUrl?: string;
+  placeId?: string;
 };
 
 export const locations: Location[] = [
