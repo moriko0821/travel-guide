@@ -25,6 +25,11 @@ export default function Map({
 }: MapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
@@ -38,6 +43,31 @@ export default function Map({
   const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
+
+  const handleLocateMe = () => {
+    if (!map) return;
+
+    if (!("geolocation" in navigator)) {
+      alert("このブラウザでは現在地情報が利用できません。");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        setUserLocation({ lat: latitude, lng: longitude });
+        map.panTo({ lat: latitude, lng: longitude });
+        map.setZoom(13);
+      },
+      (error) => {
+        console.error(error);
+        alert(
+          "現在地を取得できませんでした。位置情報の強化を確認してください。"
+        );
+      }
+    );
+  };
 
   useEffect(() => {
     if (!map || !selectedLocation) return;
@@ -78,7 +108,7 @@ export default function Map({
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-6">
+    <div className="w-full max-w-3xl mx-auto mb-6 relative">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
@@ -96,7 +126,23 @@ export default function Map({
             />
           );
         })}
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            icon={{
+              url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            }}
+            title="現在地"
+          />
+        )}
       </GoogleMap>
+      <button
+        type="button"
+        onClick={handleLocateMe}
+        className="absolute top-3 right-3 z-10 px-3 py-1.5 text-xs md:text-sm rounded-full bg-white border border-slate-300 shadow-sm hover:bg-yellow-50"
+      >
+        📍 現在地へ
+      </button>
     </div>
   );
 }

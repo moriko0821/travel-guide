@@ -88,14 +88,48 @@ const Sidebar = ({
                   onClick={() => setIsEditing(true)}
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                 >
-                  スポットを編集
+                  編集
                 </button>
                 <button
                   type="button"
                   onClick={onClearSelectedLocation}
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                 >
-                  地図全体を表示
+                  地図全体
+                </button>
+                <button
+                  type="button"
+                  className="text-sm px-3 py-1 rounded-full border-2 border-blue-500 text-blue-600 hover:bg-blue-100"
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const origin = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                          const dest = `${selectedLocation.lat},${
+                            selectedLocation!.lng
+                          }`;
+
+                          const url = `https://www.google.com/maps/dir/?api=1&origin${origin}&destination=${dest}`;
+                          window.open(url, "_blank");
+                        },
+                        () => {
+                          const dest = `${selectedLocation.lat},${
+                            selectedLocation!.lng
+                          }`;
+                          const url = `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+                          window.open(url, "_blank");
+                        }
+                      );
+                    } else {
+                      const dest = `${selectedLocation.lat},${
+                        selectedLocation!.lng
+                      }`;
+                      const url = `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+                      window.open(url, "_blank");
+                    }
+                  }}
+                >
+                  ルート表示
                 </button>
                 <button
                   type="button"
@@ -108,7 +142,7 @@ const Sidebar = ({
                   }}
                   className="text-xs px-3 py-1 rounded-full border-2 border-slate-500 text-slate-600 hover:bg-red-100"
                 >
-                  スポットを削除
+                  削除
                 </button>
               </div>
             </>
