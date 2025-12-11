@@ -174,7 +174,7 @@ function App() {
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
             />
-            <div className="w-full max-w-5xl mt-6 px-2 flex flex-col md:flex-row gap-4">
+            <div className="w-full max-w-5xl mt-6 px-2 grid grid-cols-1 md:grid-cols-3  gap-4">
               <MapSection
                 locations={visibleLocation}
                 selectedLocation={selectedLocation}

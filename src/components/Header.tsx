@@ -60,42 +60,42 @@ const Header = ({
         </button>
       </form>
       <div className="mt-3 flex justify-center">
-        <select
-          value={categoryFilter}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value as CategoryFilterType)
-          }
-          className="border rounded px-2 py-1 bg-white text-sm"
-        >
-          <option value="all">all</option>
-          <option value="city">city</option>
-          <option value="nature">nature</option>
-          <option value="restaurant">restaurant</option>
-          <option value="museum">museum</option>
-          <option value="other">other</option>
-        </select>
-      </div>
-      <div className="mt-4 flex justify-center gap-2">
-        <Link
-          to="/"
-          className={`px-4 py-1 text-sm rounded-full border-2 ${
-            urlLocation.pathname === "/"
-              ? "bg-yellow-900 text-white border-yellow-900"
-              : "bg-white text-slate-700 border-yellow-800"
-          }`}
-        >
-          地図
-        </Link>
-        <Link
-          to="/favorites"
-          className={`px-3 py-1 text-sm rounded-full border-2 ${
-            urlLocation.pathname === "/favorites"
-              ? "bg-yellow-900 text-white border-yellow-900"
-              : "bg-white text-slate-700 border-yellow-800"
-          }`}
-        >
-          お気に入り一覧
-        </Link>
+        <div className="mt-4 flex justify-center gap-2">
+          <Link
+            to="/"
+            className={`px-4 py-1 text-sm rounded-full border-2 ${
+              urlLocation.pathname === "/"
+                ? "bg-yellow-900 text-white border-yellow-900"
+                : "bg-white text-slate-700 border-yellow-800"
+            }`}
+          >
+            地図
+          </Link>
+          <Link
+            to="/favorites"
+            className={`px-3 py-1 text-sm rounded-full border-2 ${
+              urlLocation.pathname === "/favorites"
+                ? "bg-yellow-900 text-white border-yellow-900"
+                : "bg-white text-slate-700 border-yellow-800"
+            }`}
+          >
+            お気に入り一覧
+          </Link>
+          <select
+            value={categoryFilter}
+            onChange={(e) =>
+              setCategoryFilter(e.target.value as CategoryFilterType)
+            }
+            className="border-2 border-yellow-900 rounded-xl px-2 py-1 bg-white text-sm"
+          >
+            <option value="all">all</option>
+            <option value="city">city</option>
+            <option value="nature">nature</option>
+            <option value="restaurant">restaurant</option>
+            <option value="museum">museum</option>
+            <option value="other">other</option>
+          </select>
+        </div>
       </div>
     </header>
   );

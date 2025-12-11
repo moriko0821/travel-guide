@@ -139,7 +139,7 @@ export default function Map({
       <button
         type="button"
         onClick={handleLocateMe}
-        className="absolute top-3 right-3 z-10 px-3 py-1.5 text-xs md:text-sm rounded-full bg-white border border-slate-300 shadow-sm hover:bg-yellow-50"
+        className="absolute top-3 right-3 z-10 px-4 py-2 text-sm rounded-full bg-white border border-slate-300 shadow-sm hover:bg-yellow-50 active:scale-95"
       >
         📍 現在地へ
       </button>

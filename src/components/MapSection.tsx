@@ -161,7 +161,7 @@ const MapSection = ({
   }
 
   return (
-    <section className="w-full md:w-2/3 space-y-4">
+    <section className="w-full md:col-span-2 space-y-4">
       <Map
         locations={locations}
         selectedLocation={selectedLocation}

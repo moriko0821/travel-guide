@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { ChevronDown, Star } from "lucide-react";
 import type { Location } from "../data/locations";
 import { useEffect, useState } from "react";
 import { CATEGORY_OPTIONS } from "./MapSection";
@@ -28,6 +28,7 @@ const Sidebar = ({
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [favOpen, setFavOpen] = useState(false);
 
   useEffect(() => {
     if (selectedLocation) {
@@ -38,9 +39,9 @@ const Sidebar = ({
   }, [selectedLocation]);
 
   return (
-    <aside className="md:w-1/3 w-full">
+    <aside className="w-full mt-2 md:mt-0 md:col-span-1">
       {selectedLocation ? (
-        <div className="bg-white border-2 border-yellow-900 rounded-md px-4 py-3 shadow-sm">
+        <div className="bg-white border-2 border-yellow-900 rounded-md px-4 py-4 shadow-sm">
           {!isEditing ? (
             <>
               <h2 className="font-semibold text-lg">{selectedLocation.name}</h2>
@@ -95,7 +96,7 @@ const Sidebar = ({
                   onClick={onClearSelectedLocation}
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                 >
-                  地図全体
+                  全体を表示
                 </button>
                 <button
                   type="button"
@@ -204,33 +205,46 @@ const Sidebar = ({
         <p>マーカーを選択すると、場所の情報が表示されます。</p>
       )}
       <div className="mt-4">
-        <h3 className="text-sm font-semibold text-slate-800 mb-2">
-          お気に入り一覧
-        </h3>
-        {favoriteLocations.length === 0 ? (
-          <p className="text-xs text-slate-500">まだお気に入りはありません</p>
-        ) : (
-          <ul className="space-y-2 max-h-64 overflow-y-auto">
-            {favoriteLocations.map((loc) => {
-              const isActive =
-                selectedLocation && selectedLocation.id === loc.id;
-              return (
-                <li
-                  key={loc.id}
-                  className={`flex items-center justify-between text-sm rounded-md px-3 py-2 cursor-pointer border ${
-                    isActive
-                      ? "bg-yellow-100 border-yellow-900"
-                      : "bg-white border-yellow-600 hover:bg-yellow-50"
-                  }`}
-                  onClick={() => onSetSelectedLocation(loc)}
-                >
-                  {loc.name}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <button
+          type="button"
+          onClick={() => setFavOpen((v) => !v)}
+          className="w-full flex items-center justify-between border-yellow-900 rounded-md px-4 py-2 space-y-2"
+        >
+          <h3 className="font-bold sm:text-lg mb-0">お気に入り一覧</h3>
+          <ChevronDown
+            className={`w-5 h-5 transition-transform ${
+              favOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
       </div>
+      {favOpen && (
+        <>
+          {favoriteLocations.length === 0 ? (
+            <p className="text-xs text-slate-500">まだお気に入りはありません</p>
+          ) : (
+            <ul className="space-y-2 max-h-64 overflow-y-auto">
+              {favoriteLocations.map((loc) => {
+                const isActive =
+                  selectedLocation && selectedLocation.id === loc.id;
+                return (
+                  <li
+                    key={loc.id}
+                    className={`flex items-center justify-between text-sm rounded-md px-3 py-2 mr-2 cursor-pointer border ${
+                      isActive
+                        ? "bg-yellow-100 border-yellow-900"
+                        : "bg-white border-yellow-600 hover:bg-yellow-50"
+                    }`}
+                    onClick={() => onSetSelectedLocation(loc)}
+                  >
+                    {loc.name}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      )}
     </aside>
   );
 };
