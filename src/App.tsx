@@ -204,6 +204,8 @@ function App() {
               input={input}
               setInput={setInput}
               handleSearch={handleSearch}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
             />
             <Favorites
               favoriteLocations={favoriteLocations}
