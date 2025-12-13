@@ -71,6 +71,18 @@ function App() {
     localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(allLocations));
   }, [allLocations]);
 
+  //test
+  useEffect(() => {
+    async function test() {
+      const { data, error } = await supabase
+        .from("locations")
+        .select("*")
+        .limit(1);
+      console.log("supabase test", { data, error });
+    }
+    test();
+  }, []);
+
   function handleAddLocationFromMap(data: {
     name: string;
     lat: number;
