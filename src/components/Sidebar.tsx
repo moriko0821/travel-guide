@@ -25,6 +25,7 @@ const Sidebar = ({
   onUpdateLocation,
 }: SidebarProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -34,7 +35,7 @@ const Sidebar = ({
     <aside className="w-full mt-2 md:mt-0 md:col-span-1">
       {selectedLocation ? (
         <div className="bg-white border-2 border-yellow-900 rounded-md px-4 py-4 shadow-sm">
-          {!isEditing ? (
+          {!isEditing || !editingLocation ? (
             <>
               <h2 className="font-semibold text-lg">{selectedLocation.name}</h2>
               {selectedLocation.imageUrl && (
@@ -80,6 +81,8 @@ const Sidebar = ({
                   type="button"
                   onClick={() => {
                     if (!selectedLocation) return;
+
+                    setEditingLocation(selectedLocation);
                     setEditName(selectedLocation.name);
                     setEditCategory(selectedLocation.category);
                     setEditDescription(selectedLocation.description);
@@ -108,7 +111,7 @@ const Sidebar = ({
                             selectedLocation!.lng
                           }`;
 
-                          const url = `https://www.google.com/maps/dir/?api=1&origin${origin}&destination=${dest}`;
+                          const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
                           window.open(url, "_blank");
                         },
                         () => {
@@ -176,7 +179,10 @@ const Sidebar = ({
                 <button
                   type="button"
                   className="px-3 py-1 rounded-full bg-slate-300"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditingLocation(null);
+                  }}
                 >
                   キャンセル
                 </button>
@@ -184,8 +190,10 @@ const Sidebar = ({
                   type="button"
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                   onClick={() => {
+                    if (!editingLocation) return;
+
                     onUpdateLocation({
-                      ...selectedLocation,
+                      ...editingLocation,
                       name: editName,
                       category: editCategory,
                       description: editDescription,
