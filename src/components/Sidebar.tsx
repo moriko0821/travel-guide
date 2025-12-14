@@ -1,6 +1,6 @@
 import { ChevronDown, Star } from "lucide-react";
 import type { Location } from "../data/locations";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CATEGORY_OPTIONS } from "../data/categories";
 
 type SidebarProps = {
@@ -29,11 +29,6 @@ const Sidebar = ({
   const [editCategory, setEditCategory] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [favOpen, setFavOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedLocation) {
-    }
-  }, [selectedLocation]);
 
   return (
     <aside className="w-full mt-2 md:mt-0 md:col-span-1">
