@@ -1,7 +1,7 @@
 import { ChevronDown, Star } from "lucide-react";
 import type { Location } from "../data/locations";
 import { useEffect, useState } from "react";
-import { CATEGORY_OPTIONS } from "./MapSection";
+import { CATEGORY_OPTIONS } from "../data/categories";
 
 type SidebarProps = {
   selectedLocation: Location | null;
@@ -32,9 +32,6 @@ const Sidebar = ({
 
   useEffect(() => {
     if (selectedLocation) {
-      setEditName(selectedLocation.name);
-      setEditCategory(selectedLocation.category);
-      setEditDescription(selectedLocation.description);
     }
   }, [selectedLocation]);
 
@@ -86,7 +83,13 @@ const Sidebar = ({
               <div className="mt-3 flex justify-between">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => {
+                    if (!selectedLocation) return;
+                    setEditName(selectedLocation.name);
+                    setEditCategory(selectedLocation.category);
+                    setEditDescription(selectedLocation.description);
+                    setIsEditing(true);
+                  }}
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                 >
                   編集

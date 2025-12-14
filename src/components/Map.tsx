@@ -12,6 +12,8 @@ const center = {
   lng: -118.243683,
 };
 
+const LIBRARIES: "places"[] = ["places"];
+
 type MapProps = {
   locations: Location[];
   selectedLocation: Location | null;
@@ -33,7 +35,7 @@ export default function Map({
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
-    libraries: ["places"],
+    libraries: LIBRARIES,
   });
 
   const onLoad = useCallback((mapInstance: google.maps.Map) => {

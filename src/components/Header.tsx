@@ -1,14 +1,7 @@
 import { Search } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
+import type { CategoryFilterType } from "../data/categories";
 import { Link, useLocation } from "react-router-dom";
-
-type CategoryFilterType =
-  | "all"
-  | "city"
-  | "nature"
-  | "restaurant"
-  | "museum"
-  | "other";
 
 type HeaderProps = {
   favoriteCount: number;

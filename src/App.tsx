@@ -6,6 +6,7 @@ import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
 import MapSection from "./components/MapSection.tsx";
 import Header from "./components/Header.tsx";
+import { supabase } from "./lib/supabaseClient.ts";
 
 const FAVORITES_STORAGE_KEY = "travel-guide-favorite-ids";
 const LOCATIONS_STORAGE_KEY = "travel-guide-all-locations";
@@ -48,6 +49,7 @@ function App() {
     | "nature"
     | "restaurant"
     | "museum"
+    | "hotel"
     | "other";
 
   const [categoryFilter, setCategoryFilter] =

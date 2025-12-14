@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { Location } from "../data/locations";
 import Map from "./Map";
 import { ChevronDown } from "lucide-react";
+import { CATEGORY_OPTIONS } from "../data/categories";
 
 type MapSectionProps = {
   locations: Location[];
@@ -22,14 +23,6 @@ type Suggestion = {
   description: string;
   placeId: string;
 };
-
-export const CATEGORY_OPTIONS = [
-  { value: "city" },
-  { value: "nature" },
-  { value: "restaurant" },
-  { value: "museum" },
-  { value: "other" },
-];
 
 const MapSection = ({
   locations,
