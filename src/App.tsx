@@ -65,6 +65,20 @@ function App() {
 
   const favoriteCount = favoriteLocations.length;
 
+  // convert location data from supabase to this app's location type
+  function toLocation(row: any): Location {
+    return {
+      id: Number(row.id),
+      name: row.name,
+      lat: row.lat,
+      lng: row.lng,
+      category: row.category,
+      description: row.description ?? "",
+      imageUrl: row.image_url ?? "",
+      placeId: row.place_id ?? "",
+    };
+  }
+
   useEffect(() => {
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
   }, [favoriteIds]);
@@ -73,19 +87,29 @@ function App() {
     localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(allLocations));
   }, [allLocations]);
 
-  //test
   useEffect(() => {
-    async function test() {
+    async function loadFromSupabase() {
       const { data, error } = await supabase
         .from("locations")
         .select("*")
-        .limit(1);
-      console.log("supabase test", { data, error });
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Supabase load error:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const locations = data.map(toLocation);
+        setAllLocations(locations);
+        setFilteredLocations(locations);
+      }
     }
-    test();
+
+    loadFromSupabase();
   }, []);
 
-  function handleAddLocationFromMap(data: {
+  async function handleAddLocationFromMap(data: {
     name: string;
     lat: number;
     lng: number;
@@ -94,15 +118,35 @@ function App() {
     imageUrl?: string;
     placeId?: string;
   }) {
+    const { data: inserted, error } = await supabase
+      .from("locations")
+      .insert({
+        name: data.name,
+        lat: data.lat,
+        lng: data.lng,
+        category: data.category,
+        description: data.description,
+        image_url: data.imageUrl ?? "",
+        place_id: data.placeId ?? null,
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("Supabaseへの保存に失敗しました：" + error.message);
+      return;
+    }
+
     const newLocation: Location = {
-      id: Date.now(),
-      name: data.name,
-      lat: data.lat,
-      lng: data.lng,
-      category: data.category,
-      description: data.description,
-      imageUrl: data.imageUrl,
-      placeId: data.placeId,
+      id: inserted.id,
+      name: inserted.name,
+      lat: inserted.lat,
+      lng: inserted.lng,
+      category: inserted.category,
+      description: inserted.description,
+      imageUrl: inserted.image_Url ?? "",
+      placeId: inserted.place_id ?? undefined,
     };
 
     setAllLocations((prev) => [...prev, newLocation]);
@@ -149,17 +193,40 @@ function App() {
     );
   }
 
-  function handleUpdateLocation(updated: Location) {
+  async function handleUpdateLocation(loc: Location) {
+    const { data: updated, error } = await supabase
+      .from("locations")
+      .update({
+        name: loc.name,
+        lat: loc.lat,
+        lng: loc.lng,
+        category: loc.category,
+        description: loc.description,
+        image_url: loc.imageUrl ?? "",
+        place_id: loc.placeId ?? null,
+      })
+      .eq("id", loc.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Supabase update error", error);
+      alert("更新に失敗しました： " + error.message);
+      return;
+    }
+
+    const updatedLocation = toLocation(updated);
+
     setAllLocations((prev) =>
-      prev.map((loc) => (loc.id === updated.id ? updated : loc))
+      prev.map((loc) => (loc.id === updatedLocation.id ? updatedLocation : loc))
     );
 
     setFilteredLocations((prev) =>
-      prev.map((loc) => (loc.id === updated.id ? updated : loc))
+      prev.map((loc) => (loc.id === updatedLocation.id ? updatedLocation : loc))
     );
 
-    setSelectedLocation((current) =>
-      current && current.id === updated.id ? updated : current
+    setSelectedLocation((prev) =>
+      prev && prev.id === updatedLocation.id ? updatedLocation : prev
     );
   }
 
