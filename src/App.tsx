@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { locations } from "./data/locations";
 import type { Location } from "./data/locations";
 import { Routes, Route } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
@@ -9,25 +8,11 @@ import Header from "./components/Header.tsx";
 import { supabase } from "./lib/supabaseClient.ts";
 
 const FAVORITES_STORAGE_KEY = "travel-guide-favorite-ids";
-const LOCATIONS_STORAGE_KEY = "travel-guide-all-locations";
 
 function App() {
   const [input, setInput] = useState("");
-  const [allLocations, setAllLocations] = useState<Location[]>(() => {
-    const saved = localStorage.getItem(LOCATIONS_STORAGE_KEY);
-    if (!saved) {
-      return locations;
-    }
-
-    try {
-      const parsed = JSON.parse(saved) as Location[];
-      return parsed;
-    } catch {
-      return locations;
-    }
-  });
-  const [filteredLocations, setFilteredLocations] =
-    useState<Location[]>(allLocations);
+  const [allLocations, setAllLocations] = useState<Location[]>([]);
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
@@ -78,14 +63,6 @@ function App() {
       placeId: row.place_id ?? "",
     };
   }
-
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
-
-  useEffect(() => {
-    localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(allLocations));
-  }, [allLocations]);
 
   useEffect(() => {
     async function loadFromSupabase() {
@@ -184,7 +161,15 @@ function App() {
     });
   }
 
-  function handleDeleteLocation(id: number) {
+  async function handleDeleteLocation(id: number) {
+    const { error } = await supabase.from("locations").delete().eq("id", id);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      alert("削除に失敗しました：" + error.message);
+      return;
+    }
+
     setAllLocations((prev) => prev.filter((loc) => loc.id !== id));
     setFilteredLocations((prev) => prev.filter((loc) => loc.id !== id));
     setFavoriteIds((prev) => prev.filter((favId) => favId !== id));
