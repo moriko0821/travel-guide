@@ -90,7 +90,7 @@ function App() {
 
       const newTripId = data.id as string;
 
-      url.searchParams.set("trip", newTripid);
+      url.searchParams.set("trip", newTripId);
       window.history.replaceState({}, "", url.toString());
 
       setTripId(newTripId);
