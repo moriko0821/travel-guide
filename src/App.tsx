@@ -67,7 +67,7 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("ちぇっく");
+    console.log("ちぇっく", tripId);
     async function initTripUrl() {
       const url = new URL(window.location.href);
       const tripFromUrl = url.searchParams.get("trip");
