@@ -10,6 +10,8 @@ import { supabase } from "./lib/supabaseClient.ts";
 const FAVORITES_STORAGE_KEY = "travel-guide-favorite-ids";
 
 function App() {
+  const [tripId, setTripId] = useState<string | null>(null);
+
   const [input, setInput] = useState("");
   const [allLocations, setAllLocations] = useState<Location[]>([]);
   const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
@@ -63,6 +65,39 @@ function App() {
       placeId: row.place_id ?? "",
     };
   }
+
+  useEffect(() => {
+    async function initTripUrl() {
+      const url = new URL(window.location.href);
+      const tripFromUrl = url.searchParams.get("trip");
+
+      if (tripFromUrl) {
+        setTripId(tripFromUrl);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("trips")
+        .insert({ name: "Your Trip" })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error(error);
+        alert("Tripの作成に失敗しました");
+        return;
+      }
+
+      const newTripId = data.id as string;
+
+      url.searchParams.set("trip", newTripid);
+      window.history.resplaceState({}, "", url.toString());
+
+      setTripId(newTripId);
+    }
+
+    initTripUrl();
+  }, []);
 
   useEffect(() => {
     async function loadFromSupabase() {
