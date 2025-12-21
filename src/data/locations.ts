@@ -10,7 +10,6 @@ export type Location = {
 
   placeId?: string;
   photoReference?: string;
-  imageUrl?: string;
 };
 
 export const locations: Location[] = [

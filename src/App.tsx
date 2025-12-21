@@ -44,7 +44,6 @@ function App() {
       description: row.description ?? "",
       photoReference: row.photo_reference ?? "",
       placeId: row.place_id ?? "",
-      imageUrl: row.image_url ?? "",
     };
   }
 
@@ -163,7 +162,6 @@ function App() {
       description: inserted.description,
       placeId: inserted.place_id ?? undefined,
       photoReference: inserted.photo_reference ?? "",
-      imageUrl: inserted.image_url ?? "",
     };
 
     setAllLocations((prev) => [...prev, newLocation]);
@@ -247,7 +245,6 @@ function App() {
         lng: loc.lng,
         category: loc.category,
         description: loc.description,
-        image_url: loc.imageUrl ?? "",
         place_id: loc.placeId ?? null,
       })
       .eq("id", loc.id)

@@ -37,7 +37,6 @@ const MapSection = ({
   const [newDescription, setNewDescription] = useState("");
   const [newPhotoRef, setNewPhotoRef] = useState("");
   const [newPlaceId, setNewPlaceId] = useState<string | undefined>(undefined);
-  const [newImageUrl, setNewImageUrl] = useState("");
 
   const [suggestions, setSuggegstions] = useState<Suggestion[]>([]);
 
@@ -167,7 +166,6 @@ const MapSection = ({
     setNewLng("");
     setNewCategory("");
     setNewDescription("");
-    setNewImageUrl("");
   }
 
   return (

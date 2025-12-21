@@ -8,7 +8,6 @@ type SidebarProps = {
   isSelectedFavorite: boolean;
   onToggleFavorite: () => void;
   favoriteLocations: Location[];
-  onSetSelectedLocation: (loc: Location) => void;
   onDeleteLocation: (id: number) => void;
   onClearSelectedLocation: () => void;
   onUpdateLocation: (loc: Location) => void;
@@ -37,7 +36,7 @@ const Sidebar = ({
       }/photos/${selectedLocation.photoReference}/media?maxWidthPx=600&key=${
         import.meta.env.VITE_GOOGLE_MAPS_API_KEY
       }`
-    : selectedLocation?.imageUrl || "/no-image.png";
+    : "/no-image.png";
 
   return (
     <aside className="w-full mt-2 md:mt-0 md:col-span-1">
@@ -55,11 +54,6 @@ const Sidebar = ({
                     e.currentTarget.onerror = null;
 
                     e.currentTarget.src = "/no-image.png";
-
-                    onUpdateLocation({
-                      ...selectedLocation,
-                      imageUrl: "",
-                    });
                   }}
                 />
               )}
