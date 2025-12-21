@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import type { Location } from "./data/locations";
+import type { CategoryFilterType } from "./data/categories";
 import { Routes, Route } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
 import MapSection from "./components/MapSection.tsx";
 import Header from "./components/Header.tsx";
 import { supabase } from "./lib/supabaseClient.ts";
-
-const FAVORITES_STORAGE_KEY = "travel-guide-favorite-ids";
 
 function App() {
   const [tripId, setTripId] = useState<string | null>(null);
@@ -19,25 +18,7 @@ function App() {
     null
   );
 
-  const [favoriteIds, setFavoriteIds] = useState<number[]>(() => {
-    const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (!saved) return [];
-    try {
-      const parced = JSON.parse(saved) as number[];
-      return parced;
-    } catch {
-      return [];
-    }
-  });
-
-  type CategoryFilterType =
-    | "all"
-    | "city"
-    | "nature"
-    | "restaurant"
-    | "museum"
-    | "hotel"
-    | "other";
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
 
   const [categoryFilter, setCategoryFilter] =
     useState<CategoryFilterType>("all");
@@ -61,13 +42,13 @@ function App() {
       lng: row.lng,
       category: row.category,
       description: row.description ?? "",
-      imageUrl: row.image_url ?? "",
+      photoReference: row.photo_reference ?? "",
       placeId: row.place_id ?? "",
+      imageUrl: row.image_url ?? "",
     };
   }
 
   useEffect(() => {
-    console.log("ちぇっく", tripId);
     async function initTripUrl() {
       const url = new URL(window.location.href);
       const tripFromUrl = url.searchParams.get("trip");
@@ -101,6 +82,28 @@ function App() {
   }, []);
 
   useEffect(() => {
+    async function loadFavorites() {
+      if (!tripId) return;
+
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("location_id")
+        .eq("trip_id", tripId);
+
+      if (error) {
+        console.error("loadFavorites error:", error);
+        alert("お気に入りの読み込みに失敗しました：" + error.message);
+        return;
+      }
+
+      const ids = (data ?? []).map((row: any) => Number(row.location_id));
+      setFavoriteIds(ids);
+    }
+
+    loadFavorites();
+  }, [tripId]);
+
+  useEffect(() => {
     async function loadFromSupabase() {
       const { data, error } = await supabase
         .from("locations")
@@ -128,8 +131,8 @@ function App() {
     lng: number;
     category: string;
     description: string;
-    imageUrl?: string;
     placeId?: string;
+    photoReference?: string;
   }) {
     const { data: inserted, error } = await supabase
       .from("locations")
@@ -139,8 +142,8 @@ function App() {
         lng: data.lng,
         category: data.category,
         description: data.description,
-        image_url: data.imageUrl ?? "",
         place_id: data.placeId ?? null,
+        photo_reference: data.photoReference ?? null,
       })
       .select("*")
       .single();
@@ -152,14 +155,15 @@ function App() {
     }
 
     const newLocation: Location = {
-      id: inserted.id,
+      id: Number(inserted.id),
       name: inserted.name,
       lat: inserted.lat,
       lng: inserted.lng,
       category: inserted.category,
       description: inserted.description,
-      imageUrl: inserted.image_Url ?? "",
       placeId: inserted.place_id ?? undefined,
+      photoReference: inserted.photo_reference ?? "",
+      imageUrl: inserted.image_url ?? "",
     };
 
     setAllLocations((prev) => [...prev, newLocation]);
@@ -185,16 +189,36 @@ function App() {
     setSelectedLocation(null);
   }
 
-  function onToggleFavorite() {
-    if (!selectedLocation) return;
+  async function toggleFavorite(locationId: number) {
+    if (!tripId) return;
 
-    setFavoriteIds((prevFav) => {
-      if (prevFav.includes(selectedLocation.id)) {
-        return prevFav.filter((id) => id !== selectedLocation.id);
-      } else {
-        return [...prevFav, selectedLocation.id];
+    const isFav = favoriteIds.includes(locationId);
+
+    if (!isFav) {
+      const { error } = await supabase.from("favorites").insert({
+        trip_id: tripId,
+        location_id: locationId,
+      });
+      if (error) {
+        alert("お気に入り追加に失敗：" + error.message);
+        return;
       }
-    });
+
+      setFavoriteIds((prev) => [...prev, locationId]);
+    } else {
+      const { error } = await supabase
+        .from("favorites")
+        .delete()
+        .eq("trip_id", tripId)
+        .eq("location_id", locationId);
+
+      if (error) {
+        alert("お気に入り削除に失敗：" + error.message);
+        return;
+      }
+
+      setFavoriteIds((prev) => prev.filter((id) => id !== locationId));
+    }
   }
 
   async function handleDeleteLocation(id: number) {
@@ -286,7 +310,10 @@ function App() {
               <Sidebar
                 selectedLocation={selectedLocation}
                 isSelectedFavorite={isSelectedFavorite}
-                onToggleFavorite={onToggleFavorite}
+                onToggleFavorite={() => {
+                  if (!selectedLocation) return;
+                  toggleFavorite(selectedLocation.id);
+                }}
                 favoriteLocations={favoriteLocations}
                 onSetSelectedLocation={setSelectedLocation}
                 onDeleteLocation={handleDeleteLocation}

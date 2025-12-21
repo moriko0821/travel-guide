@@ -1,12 +1,16 @@
+import type { CategoryFilterType } from "./categories";
+
 export type Location = {
   id: number;
   name: string;
   lat: number;
   lng: number;
   description: string;
-  category: string;
-  imageUrl?: string;
+  category: CategoryFilterType;
+
   placeId?: string;
+  photoReference?: string;
+  imageUrl?: string;
 };
 
 export const locations: Location[] = [
@@ -25,7 +29,7 @@ export const locations: Location[] = [
     lat: 34.019454,
     lng: -118.491191,
     description: "ビーチと桟橋が有名なリゾートエリア。ゆったりした雰囲気。",
-    category: "beach",
+    category: "nature",
   },
   {
     id: 3,
@@ -33,6 +37,6 @@ export const locations: Location[] = [
     lat: 34.092809,
     lng: -118.328659,
     description: "映画の街ハリウッド。観光スポットやエンタメ施設が多い。",
-    category: "entertainment",
+    category: "city",
   },
 ];

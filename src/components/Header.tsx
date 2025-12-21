@@ -86,6 +86,7 @@ const Header = ({
             <option value="nature">nature</option>
             <option value="restaurant">restaurant</option>
             <option value="museum">museum</option>
+            <option value="hotel">museum</option>
             <option value="other">other</option>
           </select>
         </div>

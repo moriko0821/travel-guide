@@ -14,8 +14,8 @@ type MapSectionProps = {
     lng: number;
     category: string;
     description: string;
-    imageUrl?: string;
     placeId?: string;
+    photoReference?: string;
   }) => void;
 };
 
@@ -35,8 +35,9 @@ const MapSection = ({
   const [newLng, setNewLng] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newPhotoRef, setNewPhotoRef] = useState("");
   const [newPlaceId, setNewPlaceId] = useState<string | undefined>(undefined);
+  const [newImageUrl, setNewImageUrl] = useState("");
 
   const [suggestions, setSuggegstions] = useState<Suggestion[]>([]);
 
@@ -76,6 +77,33 @@ const MapSection = ({
     });
   }
 
+  async function fetchPhotoRefByPlaceId(placeId: string): Promise<string> {
+    const res = await fetch(
+      `https://places.googleapis.com/v1/places/${placeId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask": "photos",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("places details failed:", res.status, await res.text());
+      return "";
+    }
+
+    const json = await res.json();
+
+    const name: string | undefined = json?.photos?.[0]?.name;
+    if (!name) return "";
+
+    const parts = name.split("/photos/");
+    const photoRef = parts[1] ?? "";
+    return photoRef;
+  }
+
   function handleSelectSuggestion(sug: Suggestion) {
     setNewName(sug.description);
     setNewPlaceId(sug.placeId);
@@ -95,7 +123,7 @@ const MapSection = ({
     service.getDetails(
       {
         placeId: sug.placeId,
-        fields: ["geometry", "name", "photos"],
+        fields: ["geometry", "name"],
       },
       (place, status) => {
         if (
@@ -106,16 +134,10 @@ const MapSection = ({
           setNewLat(loc.lat().toString());
           setNewLng(loc.lng().toString());
 
-          if (place.photos && place.photos.length > 0) {
-            const firstPhoto = place.photos[0];
-            const photoUrl = firstPhoto.getUrl({
-              maxWidth: 600,
-              maxHeight: 400,
-            });
-            setNewImageUrl(photoUrl);
-          } else {
-            setNewImageUrl("");
-          }
+          (async () => {
+            const ref = await fetchPhotoRefByPlaceId(sug.placeId);
+            setNewPhotoRef(ref);
+          })();
         }
       }
     );
@@ -130,18 +152,13 @@ const MapSection = ({
     const latNum = Number(newLat);
     const lngNum = Number(newLng);
 
-    // if (Number.isNaN(latNum) || Number.isNaN(lngNum)) {
-    //   console.error("緯度、経度は数値で入力してください。");
-    //   return;
-    // }
-
     onAddLocation({
       name: newName,
       lat: latNum,
       lng: lngNum,
       category: newCategory || "other",
       description: newDescription || "",
-      imageUrl: newImageUrl || "",
+      photoReference: newPhotoRef || "",
       placeId: newPlaceId,
     });
 

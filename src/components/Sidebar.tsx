@@ -1,7 +1,7 @@
 import { ChevronDown, Star } from "lucide-react";
 import type { Location } from "../data/locations";
 import { useState } from "react";
-import { CATEGORY_OPTIONS } from "../data/categories";
+import { CATEGORY_OPTIONS, type CategoryFilterType } from "../data/categories";
 
 type SidebarProps = {
   selectedLocation: Location | null;
@@ -27,9 +27,17 @@ const Sidebar = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [editName, setEditName] = useState("");
-  const [editCategory, setEditCategory] = useState("");
+  const [editCategory, setEditCategory] = useState<CategoryFilterType>("other");
   const [editDescription, setEditDescription] = useState("");
   const [favOpen, setFavOpen] = useState(false);
+
+  const photoUrl = selectedLocation?.photoReference
+    ? `https://places.googleapis.com/v1/places/${
+        selectedLocation.placeId
+      }/photos/${selectedLocation.photoReference}/media?maxWidthPx=600&key=${
+        import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+      }`
+    : selectedLocation?.imageUrl || "/no-image.png";
 
   return (
     <aside className="w-full mt-2 md:mt-0 md:col-span-1">
@@ -38,9 +46,9 @@ const Sidebar = ({
           {!isEditing || !editingLocation ? (
             <>
               <h2 className="font-semibold text-lg">{selectedLocation.name}</h2>
-              {selectedLocation.imageUrl && (
+              {photoUrl && (
                 <img
-                  src={selectedLocation.imageUrl}
+                  src={photoUrl}
                   alt={selectedLocation.name}
                   className="my-2.5 w-full rounded-md max-h-96 object-cover"
                   onError={(e) => {
@@ -159,7 +167,9 @@ const Sidebar = ({
               />
               <select
                 value={editCategory}
-                onChange={(e) => setEditCategory(e.target.value)}
+                onChange={(e) =>
+                  setEditCategory(e.target.value as CategoryFilterType)
+                }
                 className="border rounded px-2 py-1 text-sm mb-2.5"
               >
                 <option value="">カテゴリを選択</option>
