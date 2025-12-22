@@ -29,7 +29,7 @@ const Header = ({
           Travel Map Guide
         </h1>
         {favoriteCount > 0 && (
-          <span className="text-xs px-2.5 py-1.5 mt-1.5 rounded-full bg-yellow-900 text-white">
+          <span className="text-xs whitespace-nowrap px-2.5 py-1.5 mt-1.5 rounded-full bg-yellow-900 text-white">
             お気に入り： {favoriteCount}
           </span>
         )}

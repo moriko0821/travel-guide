@@ -101,7 +101,7 @@ const Sidebar = ({
                   onClick={onClearSelectedLocation}
                   className="text-sm px-3 py-1 rounded-full bg-yellow-900 text-white hover:bg-yellow-800"
                 >
-                  全体を表示
+                  all spots
                 </button>
                 <button
                   type="button"
