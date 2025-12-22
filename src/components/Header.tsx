@@ -3,6 +3,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type { CategoryFilterType } from "../data/categories";
 import { Link, useLocation } from "react-router-dom";
 
+const urlLocation = useLocation();
+
 type HeaderProps = {
   favoriteCount: number;
   input: string;
@@ -55,7 +57,7 @@ const Header = ({
       <div className="mt-3 flex justify-center">
         <div className="mt-4 flex justify-center gap-2">
           <Link
-            to="/"
+            to={`/${urlLocation.search}`}
             className={`px-4 py-1 text-sm rounded-full border-2 ${
               urlLocation.pathname === "/"
                 ? "bg-yellow-900 text-white border-yellow-900"
@@ -65,7 +67,7 @@ const Header = ({
             地図
           </Link>
           <Link
-            to="/favorites"
+            to={`/favorites${urlLocation.search}`}
             className={`px-3 py-1 text-sm rounded-full border-2 ${
               urlLocation.pathname === "/favorites"
                 ? "bg-yellow-900 text-white border-yellow-900"

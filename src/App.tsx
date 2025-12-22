@@ -80,6 +80,19 @@ function App() {
     initTripUrl();
   }, []);
 
+  //
+  useEffect(() => {
+    if (!tripId) return;
+
+    const url = new URL(window.location.href);
+    const current = url.searchParams.get("trip");
+
+    if (current !== tripId) {
+      url.searchParams.set("trip", atripId);
+      window.history.replaceState({}, "", url.toString);
+    }
+  }, [tripId]);
+
   useEffect(() => {
     async function loadFromSupabase() {
       if (!tripId) return;
