@@ -12,8 +12,6 @@ type HeaderProps = {
   setCategoryFilter: Dispatch<SetStateAction<CategoryFilterType>>;
 };
 
-const { pathname, search } = useLocation();
-
 const Header = ({
   favoriteCount,
   input,
@@ -22,6 +20,8 @@ const Header = ({
   categoryFilter,
   setCategoryFilter,
 }: HeaderProps) => {
+  const { pathname, search } = useLocation();
+
   return (
     <header className="w-full max-w-5xl mx-auto text-center">
       <div className="flex items-center justify-center  gap-3 mb-4">
