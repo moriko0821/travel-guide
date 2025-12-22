@@ -42,8 +42,8 @@ function App() {
       lng: row.lng,
       category: row.category,
       description: row.description ?? "",
-      photoReference: row.photo_reference ?? "",
-      placeId: row.place_id ?? "",
+      photoReference: row.photo_reference ?? undefined,
+      placeId: row.place_id ?? undefined,
     };
   }
 
@@ -81,6 +81,31 @@ function App() {
   }, []);
 
   useEffect(() => {
+    async function loadFromSupabase() {
+      if (!tripId) return;
+
+      const { data, error } = await supabase
+        .from("locations")
+        .select("*")
+        .eq("trip_id", tripId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Supabase load error:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const locations = data.map(toLocation);
+        setAllLocations(locations);
+        setFilteredLocations(locations);
+      }
+    }
+
+    loadFromSupabase();
+  }, [tripId]);
+
+  useEffect(() => {
     async function loadFavorites() {
       if (!tripId) return;
 
@@ -102,28 +127,6 @@ function App() {
     loadFavorites();
   }, [tripId]);
 
-  useEffect(() => {
-    async function loadFromSupabase() {
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Supabase load error:", error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const locations = data.map(toLocation);
-        setAllLocations(locations);
-        setFilteredLocations(locations);
-      }
-    }
-
-    loadFromSupabase();
-  }, []);
-
   async function handleAddLocationFromMap(data: {
     name: string;
     lat: number;
@@ -136,6 +139,7 @@ function App() {
     const { data: inserted, error } = await supabase
       .from("locations")
       .insert({
+        trip_id: tripId,
         name: data.name,
         lat: data.lat,
         lng: data.lng,

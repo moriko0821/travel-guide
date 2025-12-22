@@ -55,6 +55,10 @@ const Favorites = ({
                       src={photoUrl}
                       alt={loc.name}
                       className="mt-2 w-full object-cover rounded"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/noimage.png";
+                      }}
                     />
                   </button>
                   <div className="mt-2 flex justify-end">

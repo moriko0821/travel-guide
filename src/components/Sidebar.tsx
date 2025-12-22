@@ -30,13 +30,14 @@ const Sidebar = ({
   const [editDescription, setEditDescription] = useState("");
   const [favOpen, setFavOpen] = useState(false);
 
-  const photoUrl = selectedLocation?.photoReference
-    ? `https://places.googleapis.com/v1/places/${
-        selectedLocation.placeId
-      }/photos/${selectedLocation.photoReference}/media?maxWidthPx=600&key=${
-        import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-      }`
-    : "/no-image.png";
+  const photoUrl =
+    selectedLocation?.photoReference && selectedLocation?.placeId
+      ? `https://places.googleapis.com/v1/places/${
+          selectedLocation.placeId
+        }/photos/${selectedLocation.photoReference}/media?maxWidthPx=600&key=${
+          import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+        }`
+      : "/no-image.png";
 
   return (
     <aside className="w-full mt-2 md:mt-0 md:col-span-1">
