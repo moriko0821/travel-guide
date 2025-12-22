@@ -12,6 +12,8 @@ type HeaderProps = {
   setCategoryFilter: Dispatch<SetStateAction<CategoryFilterType>>;
 };
 
+const { pathname, search } = useLocation();
+
 const Header = ({
   favoriteCount,
   input,
@@ -20,8 +22,6 @@ const Header = ({
   categoryFilter,
   setCategoryFilter,
 }: HeaderProps) => {
-  const urlLocation = useLocation();
-
   return (
     <header className="w-full max-w-5xl mx-auto text-center">
       <div className="flex items-center justify-center  gap-3 mb-4">
@@ -55,9 +55,9 @@ const Header = ({
       <div className="mt-3 flex justify-center">
         <div className="mt-4 flex justify-center gap-2">
           <Link
-            to={`/${urlLocation.search}`}
+            to={`/${search}`}
             className={`px-4 py-1 text-sm rounded-full border-2 ${
-              urlLocation.pathname === "/"
+              pathname === "/"
                 ? "bg-yellow-900 text-white border-yellow-900"
                 : "bg-white text-slate-700 border-yellow-800"
             }`}
@@ -65,9 +65,9 @@ const Header = ({
             地図
           </Link>
           <Link
-            to={`/favorites${urlLocation.search}`}
+            to={`/favorites${search}`}
             className={`px-3 py-1 text-sm rounded-full border-2 ${
-              urlLocation.pathname === "/favorites"
+              pathname === "/favorites"
                 ? "bg-yellow-900 text-white border-yellow-900"
                 : "bg-white text-slate-700 border-yellow-800"
             }`}

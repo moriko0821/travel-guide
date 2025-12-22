@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { Location } from "./data/locations";
 import type { CategoryFilterType } from "./data/categories";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
 import MapSection from "./components/MapSection.tsx";
@@ -80,18 +80,23 @@ function App() {
     initTripUrl();
   }, []);
 
-  //
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!tripId) return;
 
-    const url = new URL(window.location.href);
-    const current = url.searchParams.get("trip");
+    const params = new URLSearchParams(location.search);
+    const tripInUrl = params.get("trip");
 
-    if (current !== tripId) {
-      url.searchParams.set("trip", tripId);
-      window.history.replaceState({}, "", url.toString());
+    if (tripInUrl !== tripId) {
+      params.set("trip", tripId);
+      navigate(
+        { pathname: location.pathname, search: `?${params.toString()}` },
+        { replace: true }
+      );
     }
-  }, [tripId]);
+  }, [tripId, location.pathname, location.search, navigate]);
 
   useEffect(() => {
     async function loadFromSupabase() {
