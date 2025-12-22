@@ -1,6 +1,6 @@
 import { ChevronDown, Star } from "lucide-react";
 import type { Location } from "../data/locations";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { CATEGORY_OPTIONS, type CategoryFilterType } from "../data/categories";
 
 type SidebarProps = {
@@ -8,6 +8,7 @@ type SidebarProps = {
   isSelectedFavorite: boolean;
   onToggleFavorite: () => void;
   favoriteLocations: Location[];
+  onSetSelectedLocation: Dispatch<SetStateAction<Location | null>>;
   onDeleteLocation: (id: number) => void;
   onClearSelectedLocation: () => void;
   onUpdateLocation: (loc: Location) => void;
