@@ -88,7 +88,7 @@ function App() {
     const current = url.searchParams.get("trip");
 
     if (current !== tripId) {
-      url.searchParams.set("trip", atripId);
+      url.searchParams.set("trip", tripId);
       window.history.replaceState({}, "", url.toString);
     }
   }, [tripId]);
