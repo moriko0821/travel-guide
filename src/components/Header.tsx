@@ -3,8 +3,6 @@ import type { Dispatch, SetStateAction } from "react";
 import type { CategoryFilterType } from "../data/categories";
 import { Link, useLocation } from "react-router-dom";
 
-const urlLocation = useLocation();
-
 type HeaderProps = {
   favoriteCount: number;
   input: string;
