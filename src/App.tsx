@@ -10,16 +10,16 @@ import { supabase } from "./lib/supabaseClient.ts";
 
 function App() {
   const [tripId, setTripId] = useState<string | null>(null);
-
+  const [tripName, setTripName] = useState<string>("");
+  const [tripNameLoading, setTripNameLoading] = useState(false);
+  const [tripNameError, setTripNameError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [allLocations, setAllLocations] = useState<Location[]>([]);
   const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
-
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-
   const [categoryFilter, setCategoryFilter] =
     useState<CategoryFilterType>("all");
 
@@ -32,6 +32,24 @@ function App() {
   );
 
   const favoriteCount = favoriteLocations.length;
+
+  const updateTripName = async (newName: string) => {
+    if (!tripId) throw new Error("tripIdがありません");
+
+    const trimmed = newName.trim();
+    if (!trimmed) throw new Error("trip名が空です");
+
+    const { error } = await supabase
+      .from("trips")
+      .update({ name: trimmed })
+      .eq("id", tripId)
+      .select("id, name")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    setTripName(trimmed);
+  };
 
   // convert location data from supabase to this app's location type
   function toLocation(row: any): Location {
@@ -121,6 +139,33 @@ function App() {
     }
 
     loadFromSupabase();
+  }, [tripId]);
+
+  useEffect(() => {
+    if (!tripId) return;
+
+    const loadTripName = async () => {
+      setTripNameLoading(true);
+      setTripNameError(null);
+
+      const { data, error } = await supabase
+        .from("trips")
+        .select("name")
+        .eq("id", tripId)
+        .single();
+
+      if (error) {
+        console.error("Trip name load error:", error);
+        setTripNameError("trip名の読み込みに失敗しました");
+        setTripNameLoading(false);
+        return;
+      }
+
+      setTripName(data?.name ?? "");
+      setTripNameLoading(false);
+    };
+
+    loadTripName();
   }, [tripId]);
 
   useEffect(() => {
@@ -318,6 +363,10 @@ function App() {
               handleSearch={handleSearch}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
+              tripName={tripName}
+              tripNameLoading={tripNameLoading}
+              tripNameError={tripNameError}
+              onSaveTripName={updateTripName}
             />
             <div className="w-full max-w-5xl mt-6 px-2 grid grid-cols-1 md:grid-cols-3  gap-4">
               <MapSection
@@ -354,6 +403,10 @@ function App() {
               handleSearch={handleSearch}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
+              tripName={tripName}
+              tripNameLoading={tripNameLoading}
+              tripNameError={tripNameError}
+              onSaveTripName={updateTripName}
             />
             <Favorites
               favoriteLocations={favoriteLocations}
