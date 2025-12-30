@@ -66,6 +66,8 @@ npm install
 VITE_GOOGLE_MAPS_API_KEY=xxxxxxxxxxxxxxxxxxxx
 ```
 
+SupabaseのURL/ANON_KEYも必要（プロジェクトで設定）
+
 Supabase 用の環境変数はあなたの実装に合わせて設定してください  
 （例：`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` など）。
 
