@@ -40,8 +40,10 @@ Trip ごとに URL（`?trip=...`）でデータが分離され、共有もしや
 <img width="1328" height="790" alt="image" src="https://github.com/user-attachments/assets/00b63284-6b43-499b-ad8d-31b91db27ea5" />
 
 
+
 - お気に入り追加
 <img width="865" height="562" alt="image" src="https://github.com/user-attachments/assets/44701817-4804-47bc-b5ab-a9a9d21f3ca7" />
+
 
 
 - お気に入り：`/favorites`
