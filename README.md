@@ -39,6 +39,9 @@ Trip ごとに URL（`?trip=...`）でデータが分離され、共有もしや
 - 地図：`/`
 - お気に入り：`/favorites`
 
+<img width="1328" height="790" alt="image" src="https://github.com/user-attachments/assets/00b63284-6b43-499b-ad8d-31b91db27ea5" />
+
+
 ---
 
 ## セットアップ
