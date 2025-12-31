@@ -28,7 +28,7 @@ const Favorites = ({
         ) : (
           <ul className="space-y-2">
             {favoriteLocations.map((loc) => {
-              const photoUrl = loc.photoReference
+              const photoUrl = loc.photoReference && loc.placeId
                 ? `https://places.googleapis.com/v1/places/${
                     loc.placeId
                   }/photos/${loc.photoReference}/media?maxWidthPx=600&key=${
