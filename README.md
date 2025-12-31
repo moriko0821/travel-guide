@@ -41,7 +41,7 @@ Trip ごとに URL（`?trip=...`）でデータが分離され、共有もしや
 
 
 
-- お気に入り追加
+- スポットを追加
 <img width="865" height="562" alt="image" src="https://github.com/user-attachments/assets/44701817-4804-47bc-b5ab-a9a9d21f3ca7" />
 
 
