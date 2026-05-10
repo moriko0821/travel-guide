@@ -70,7 +70,7 @@ const Header = ({
                     setNewTripNameSaving(false);
                   }
                 }}
-                className="text-sm px-3 py-1 rounded border border-yellow-900 bg-yellow-900 text-white disabeld:opacity-60"
+                className="text-sm px-3 py-1 rounded border border-yellow-900 bg-yellow-900 text-white disabled:opacity-60"
               >
                 {newTripNameSaving ? "保存中..." : "保存"}
               </button>
@@ -172,7 +172,7 @@ const Header = ({
             <option value="nature">nature</option>
             <option value="restaurant">restaurant</option>
             <option value="museum">museum</option>
-            <option value="hotel">museum</option>
+            <option value="hotel">hotel</option>
             <option value="other">other</option>
           </select>
         </div>

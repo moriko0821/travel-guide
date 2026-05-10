@@ -48,6 +48,7 @@ Trip ごとに URL（`?trip=...`）でデータが分離され、共有もしや
 
 - お気に入り：`/favorites`
 <img width="1276" height="846" alt="image" src="https://github.com/user-attachments/assets/d1814934-d9a4-49ef-9c64-fabb641163ce" />
+
 ---
 
 ## セットアップ

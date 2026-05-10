@@ -5,7 +5,7 @@ type FavoriteProps = {
   selectedLocation: Location | null;
   setSelectedLocation: (loc: Location) => void;
   favoriteIds: number[];
-  onDeleteLocation: (id: number) => void;
+  onRemoveFavorite: (id: number) => void;
 };
 
 const Favorites = ({
@@ -13,7 +13,7 @@ const Favorites = ({
   selectedLocation,
   setSelectedLocation,
   favoriteIds,
-  onDeleteLocation,
+  onRemoveFavorite,
 }: FavoriteProps) => {
   return (
     <main className="min-h-screen bg-yellow-50 flex flex-col items-center pb-8 px-2">
@@ -57,21 +57,20 @@ const Favorites = ({
                       className="mt-2 w-full object-cover rounded"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/noimage.png";
+                        e.currentTarget.src = "/no-image.png";
                       }}
                     />
                   </button>
                   <div className="mt-2 flex justify-end">
                     <button
                       type="button"
-                      onClick={() => {
-                        if (window.confirm(`${loc.name}を削除しますか？`)) {
-                          onDeleteLocation(loc.id);
-                        }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveFavorite(loc.id);
                       }}
                       className="text-xs px-3 py-1 rounded-full border-2 border-slate-500 text-slate-600 hover:bg-red-100"
                     >
-                      削除する
+                      お気に入りから外す
                     </button>
                   </div>
                 </li>

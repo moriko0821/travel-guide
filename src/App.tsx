@@ -1,25 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import type { Location } from "./data/locations";
 import type { CategoryFilterType } from "./data/categories";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Favorites from "./pages/Favorites.tsx";
 import Sidebar from "./components/Sidebar.tsx";
 import MapSection from "./components/MapSection.tsx";
 import Header from "./components/Header.tsx";
-import { supabase } from "./lib/supabaseClient.ts";
+import { useTrip } from "./hooks/useTrip";
+import { useLocations } from "./hooks/useLocations";
+import { useFavorites } from "./hooks/useFavorites";
 
 function App() {
-  const [tripId, setTripId] = useState<string | null>(null);
-  const [tripName, setTripName] = useState<string>("");
-  const [tripNameLoading, setTripNameLoading] = useState(false);
-  const [tripNameError, setTripNameError] = useState<string | null>(null);
+  const { tripId, tripName, tripNameLoading, tripNameError, updateTripName } =
+    useTrip();
+  const {
+    locations: allLocations,
+    locationsLoading,
+    locationsError,
+    addLocation,
+    updateLocation,
+    deleteLocation,
+  } = useLocations(tripId);
+  const { favoriteIds, toggleFavorite, removeFavoriteLocally } =
+    useFavorites(tripId);
+
   const [input, setInput] = useState("");
-  const [allLocations, setAllLocations] = useState<Location[]>([]);
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [categoryFilter, setCategoryFilter] =
     useState<CategoryFilterType>("all");
 
@@ -33,322 +42,46 @@ function App() {
 
   const favoriteCount = favoriteLocations.length;
 
-  const updateTripName = async (newName: string) => {
-    if (!tripId) throw new Error("tripIdがありません");
-
-    const trimmed = newName.trim();
-    if (!trimmed) throw new Error("trip名が空です");
-
-    const { error } = await supabase
-      .from("trips")
-      .update({ name: trimmed })
-      .eq("id", tripId)
-      .select("id, name")
-      .single();
-
-    if (error) throw new Error(error.message);
-
-    setTripName(trimmed);
-  };
-
-  // convert location data from supabase to this app's location type
-  function toLocation(row: any): Location {
-    return {
-      id: Number(row.id),
-      name: row.name,
-      lat: row.lat,
-      lng: row.lng,
-      category: row.category,
-      description: row.description ?? "",
-      photoReference: row.photo_reference ?? undefined,
-      placeId: row.place_id ?? undefined,
-    };
-  }
-
-  useEffect(() => {
-    async function initTripUrl() {
-      const url = new URL(window.location.href);
-      const tripFromUrl = url.searchParams.get("trip");
-
-      if (tripFromUrl) {
-        setTripId(tripFromUrl);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("trips")
-        .insert({ name: "Your Trip" })
-        .select("id")
-        .single();
-
-      if (error) {
-        console.error(error);
-        alert("Tripの作成に失敗しました");
-        return;
-      }
-
-      const newTripId = data.id as string;
-
-      url.searchParams.set("trip", newTripId);
-      window.history.replaceState({}, "", url.toString());
-
-      setTripId(newTripId);
-    }
-
-    initTripUrl();
-  }, []);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!tripId) return;
-
-    const params = new URLSearchParams(location.search);
-    const tripInUrl = params.get("trip");
-
-    if (tripInUrl !== tripId) {
-      params.set("trip", tripId);
-      navigate(
-        { pathname: location.pathname, search: `?${params.toString()}` },
-        { replace: true }
-      );
-    }
-  }, [tripId, location.pathname, location.search, navigate]);
-
-  useEffect(() => {
-    async function loadFromSupabase() {
-      if (!tripId) return;
-
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .eq("trip_id", tripId)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Supabase load error:", error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const locations = data.map(toLocation);
-        setAllLocations(locations);
-        setFilteredLocations(locations);
-      }
-    }
-
-    loadFromSupabase();
-  }, [tripId]);
-
-  useEffect(() => {
-    if (!tripId) return;
-
-    const loadTripName = async () => {
-      setTripNameLoading(true);
-      setTripNameError(null);
-
-      const { data, error } = await supabase
-        .from("trips")
-        .select("name")
-        .eq("id", tripId)
-        .single();
-
-      if (error) {
-        console.error("Trip name load error:", error);
-        setTripNameError("trip名の読み込みに失敗しました");
-        setTripNameLoading(false);
-        return;
-      }
-
-      setTripName(data?.name ?? "");
-      setTripNameLoading(false);
-    };
-
-    loadTripName();
-  }, [tripId]);
-
-  useEffect(() => {
-    async function loadFavorites() {
-      if (!tripId) return;
-
-      const { data, error } = await supabase
-        .from("favorites")
-        .select("location_id")
-        .eq("trip_id", tripId);
-
-      if (error) {
-        console.error("loadFavorites error:", error);
-        alert("お気に入りの読み込みに失敗しました：" + error.message);
-        return;
-      }
-
-      const ids = (data ?? []).map((row: any) => Number(row.location_id));
-      setFavoriteIds(ids);
-    }
-
-    loadFavorites();
-  }, [tripId]);
-
-  async function handleAddLocationFromMap(data: {
-    name: string;
-    lat: number;
-    lng: number;
-    category: string;
-    description: string;
-    placeId?: string;
-    photoReference?: string;
-  }) {
-    const { data: inserted, error } = await supabase
-      .from("locations")
-      .insert({
-        trip_id: tripId,
-        name: data.name,
-        lat: data.lat,
-        lng: data.lng,
-        category: data.category,
-        description: data.description,
-        place_id: data.placeId ?? null,
-        photo_reference: data.photoReference ?? null,
-      })
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error(error);
-      alert("Supabaseへの保存に失敗しました：" + error.message);
-      return;
-    }
-
-    const newLocation: Location = {
-      id: Number(inserted.id),
-      name: inserted.name,
-      lat: inserted.lat,
-      lng: inserted.lng,
-      category: inserted.category,
-      description: inserted.description,
-      placeId: inserted.place_id ?? undefined,
-      photoReference: inserted.photo_reference ?? "",
-    };
-
-    setAllLocations((prev) => [...prev, newLocation]);
-    setFilteredLocations((prev) => [...prev, newLocation]);
-  }
-
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    if (input.trim() === "") {
-      setFilteredLocations(allLocations);
-      return;
-    }
-
-    const lowerKeyword = input.toLowerCase();
-    const filtered = allLocations.filter((loc) =>
-      loc.name.toLowerCase().includes(lowerKeyword)
-    );
-
-    setFilteredLocations(filtered);
-
-    // 検索したら選択中の場所をクリアする
+    setSearchKeyword(input.trim());
     setSelectedLocation(null);
   }
 
-  async function toggleFavorite(locationId: number) {
-    if (!tripId) return;
-
-    const isFav = favoriteIds.includes(locationId);
-
-    if (!isFav) {
-      const { error } = await supabase.from("favorites").insert({
-        trip_id: tripId,
-        location_id: locationId,
-      });
-      if (error) {
-        alert("お気に入り追加に失敗：" + error.message);
-        return;
-      }
-
-      setFavoriteIds((prev) => [...prev, locationId]);
-    } else {
-      const { error } = await supabase
-        .from("favorites")
-        .delete()
-        .eq("trip_id", tripId)
-        .eq("location_id", locationId);
-
-      if (error) {
-        alert("お気に入り削除に失敗：" + error.message);
-        return;
-      }
-
-      setFavoriteIds((prev) => prev.filter((id) => id !== locationId));
-    }
-  }
-
   async function handleDeleteLocation(id: number) {
-    const { error } = await supabase.from("locations").delete().eq("id", id);
+    const ok = await deleteLocation(id);
+    if (!ok) return;
 
-    if (error) {
-      console.error("Supabase delete error:", error);
-      alert("削除に失敗しました：" + error.message);
-      return;
-    }
-
-    setAllLocations((prev) => prev.filter((loc) => loc.id !== id));
-    setFilteredLocations((prev) => prev.filter((loc) => loc.id !== id));
-    setFavoriteIds((prev) => prev.filter((favId) => favId !== id));
+    removeFavoriteLocally(id);
     setSelectedLocation((current) =>
       current && current.id === id ? null : current
     );
   }
 
   async function handleUpdateLocation(loc: Location) {
-    const { data: updated, error } = await supabase
-      .from("locations")
-      .update({
-        name: loc.name,
-        lat: loc.lat,
-        lng: loc.lng,
-        category: loc.category,
-        description: loc.description,
-        place_id: loc.placeId ?? null,
-      })
-      .eq("id", loc.id)
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error("Supabase update error", error);
-      alert("更新に失敗しました： " + error.message);
-      return;
-    }
-
-    const updatedLocation = toLocation(updated);
-
-    setAllLocations((prev) =>
-      prev.map((loc) => (loc.id === updatedLocation.id ? updatedLocation : loc))
-    );
-
-    setFilteredLocations((prev) =>
-      prev.map((loc) => (loc.id === updatedLocation.id ? updatedLocation : loc))
-    );
+    const updated = await updateLocation(loc);
+    if (!updated) return;
 
     setSelectedLocation((prev) =>
-      prev && prev.id === updatedLocation.id ? updatedLocation : prev
+      prev && prev.id === updated.id ? updated : prev
     );
   }
 
-  // Search result with category Filter and sorted
-  const visibleLocation: Location[] = (() => {
-    let list = filteredLocations;
+  // 検索キーワードとカテゴリフィルターを適用した派生リスト
+  const visibleLocation = useMemo<Location[]>(() => {
+    let list = allLocations;
+
+    if (searchKeyword) {
+      const lower = searchKeyword.toLowerCase();
+      list = list.filter((loc) => loc.name.toLowerCase().includes(lower));
+    }
 
     if (categoryFilter !== "all") {
       list = list.filter((loc) => loc.category === categoryFilter);
     }
 
     return list;
-  })();
+  }, [allLocations, searchKeyword, categoryFilter]);
 
   return (
     <Routes>
@@ -368,12 +101,34 @@ function App() {
               tripNameError={tripNameError}
               onSaveTripName={updateTripName}
             />
+            {locationsLoading && (
+              <div className="mt-4 text-sm text-slate-700">
+                スポットを読み込み中...
+              </div>
+            )}
+            {locationsError && (
+              <div className="mt-4 text-sm text-red-600">
+                読み込みに失敗しました：{locationsError}
+              </div>
+            )}
+            {!locationsLoading &&
+              !locationsError &&
+              allLocations.length === 0 && (
+                <div className="mt-4 w-full max-w-2xl rounded-lg border border-yellow-900 bg-white py-3 px-4 text-sm text-slate-700">
+                  <div className="font-semibold text-slate-800">
+                    スポットがまだありません
+                  </div>
+                  <div className="mt-1">
+                    下で新しいスポットを追加するか、地図をクリックして追加してみてください！
+                  </div>
+                </div>
+              )}
             <div className="w-full max-w-5xl mt-6 px-2 grid grid-cols-1 md:grid-cols-3  gap-4">
               <MapSection
                 locations={visibleLocation}
                 selectedLocation={selectedLocation}
                 onSelectLocation={setSelectedLocation}
-                onAddLocation={handleAddLocationFromMap}
+                onAddLocation={addLocation}
               />
               <Sidebar
                 selectedLocation={selectedLocation}
@@ -408,12 +163,22 @@ function App() {
               tripNameError={tripNameError}
               onSaveTripName={updateTripName}
             />
+            {favoriteLocations.length === 0 && (
+              <div className="mt-4 w-full max-w-2xl rounded-lg border border-yellow-900 bg-white py-3 px-4 text-sm text-slate-700">
+                <div className="font-semibold text-slate-800">
+                  お気に入りがまだありません
+                </div>
+                <div className="mt-1">
+                  地図ページでスポットを選んで、⭐ボタンからお気に入りに追加できます！
+                </div>
+              </div>
+            )}
             <Favorites
               favoriteLocations={favoriteLocations}
               selectedLocation={selectedLocation}
               setSelectedLocation={setSelectedLocation}
               favoriteIds={favoriteIds}
-              onDeleteLocation={handleDeleteLocation}
+              onRemoveFavorite={toggleFavorite}
             />
           </main>
         }

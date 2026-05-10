@@ -32,7 +32,7 @@ export default function Map({
     lng: number;
   } | null>(null);
 
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
     libraries: LIBRARIES,
@@ -103,8 +103,40 @@ export default function Map({
     map.fitBounds(bounds);
   }, [map, locations, selectedLocation]);
 
+  if (loadError) {
+    return (
+      <div className="w-full max-w-3xl mx-auto">
+        <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-red-700">
+          <div>Google Mapの読み込みに失敗しました。</div>
+          <div className="mt-1">
+            以下を確認してください。
+            <ul className="mt-1 list-disc pl-5 space-y-1">
+              <li>VITE_GOOGLE_MAPS_API_KEYが正しいか</li>
+              <li>Maps JavaScript API / Places API が有効か</li>
+              <li>
+                Billing（課金）が有効か、キー制限でドメインがブロックされていないか
+              </li>
+            </ul>
+          </div>
+          <div className="mt-2 flex items-center gap-3">
+            <button
+              type="button"
+              className="underline"
+              onClick={() => window.location.reload()}
+            >
+              再読み込み
+            </button>
+            <span className="text-xs text-red-600 break-words">
+              {String(loadError)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isLoaded) {
-    return <p className="text-center">Loading Map...</p>;
+    return <div className="w-full max-w-3xl mx-auto">Loading Map...</div>;
   }
 
   return (
